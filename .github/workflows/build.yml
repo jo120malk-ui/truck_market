@@ -23,7 +23,7 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Create fresh Flutter project and replace lib
+      - name: Setup project
         run: |
           flutter create --org com.truckmarket --project-name truck_market /tmp/fresh_app
           rm -rf /tmp/fresh_app/lib
@@ -35,21 +35,16 @@ jobs:
         working-directory: /tmp/fresh_app
         run: flutter pub get
 
-      - name: Build APK with full output
+      - name: Show pubspec resolved
         working-directory: /tmp/fresh_app
-        run: |
-          flutter build apk --release --no-shrink 2>&1 | tee /tmp/build_output.txt || true
-          echo "=== Last 80 lines of build output ==="
-          tail -80 /tmp/build_output.txt
-          echo "=== Check if APK was created ==="
-          find . -name "*.apk" 2>/dev/null || echo "No APK found"
-          exit $(grep -c "FAILED\|BUILD FAILED" /tmp/build_output.txt | python3 -c "import sys; print(1 if int(sys.stdin.read().strip())>0 else 0)")
+        run: cat pubspec.lock | head -30
+
+      - name: Build APK
+        working-directory: /tmp/fresh_app
+        run: flutter build apk --release --no-shrink
 
       - uses: actions/upload-artifact@v4
-        if: always()
         with:
           name: truck-market-apk
-          path: |
-            /tmp/fresh_app/build/app/outputs/flutter-apk/*.apk
-            /tmp/build_output.txt
+          path: /tmp/fresh_app/build/app/outputs/flutter-apk/app-release.apk
           retention-days: 30
