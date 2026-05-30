@@ -17,12 +17,14 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Setup Flutter
-        run: |
-          git clone https://github.com/flutter/flutter.git --depth 1 -b 3.19.6 /opt/flutter
-          echo "/opt/flutter/bin" >> $GITHUB_PATH
-          /opt/flutter/bin/flutter config --no-analytics
-          /opt/flutter/bin/flutter precache --android
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.19.6'
+          channel: 'stable'
+          cache: true
+
+      - name: Flutter doctor
+        run: flutter doctor -v
 
       - name: Flutter pub get
         run: flutter pub get
@@ -30,24 +32,14 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x android/gradlew
 
-      - name: Build APK
-        env:
-          GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2"
-        run: |
-          flutter build apk \
-            --release \
-            --no-shrink \
-            --no-tree-shake-icons \
-            --dart-define=FLUTTER_WEB_CANVASKIT_URL=none
+      - name: Build APK (debug first for test)
+        run: flutter build apk --debug
 
-      - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
+      - name: Build APK release
+        run: flutter build apk --release --no-shrink
+
+      - uses: actions/upload-artifact@v4
         with:
           name: truck-market-apk
           path: build/app/outputs/flutter-apk/app-release.apk
           retention-days: 30
-
-      - name: Show APK info
-        run: |
-          ls -lh build/app/outputs/flutter-apk/
-          echo "✅ APK built successfully!"
