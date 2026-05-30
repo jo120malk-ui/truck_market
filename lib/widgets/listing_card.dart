@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../models/truck_listing.dart';
 import '../utils/app_theme.dart';
-import 'package:timeago/timeago.dart' as timeago;
 
 class ListingCard extends StatelessWidget {
   final TruckListing listing;
@@ -18,6 +17,15 @@ class ListingCard extends StatelessWidget {
     this.onDelete,
   });
 
+  String _timeAgo(DateTime date) {
+    final diff = DateTime.now().difference(date);
+    if (diff.inDays > 30) return 'منذ ${(diff.inDays / 30).floor()} شهر';
+    if (diff.inDays > 0) return 'منذ ${diff.inDays} يوم';
+    if (diff.inHours > 0) return 'منذ ${diff.inHours} ساعة';
+    if (diff.inMinutes > 0) return 'منذ ${diff.inMinutes} دقيقة';
+    return 'الآن';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -28,7 +36,6 @@ class ListingCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image
             ClipRRect(
               borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
               child: SizedBox(
@@ -52,7 +59,6 @@ class ListingCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Title & Price
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -72,7 +78,6 @@ class ListingCard extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  // Tags
                   Wrap(
                     spacing: 6,
                     runSpacing: 4,
@@ -83,7 +88,6 @@ class ListingCard extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  // Meta
                   Row(
                     children: [
                       const Icon(Icons.person_outline, size: 14, color: Colors.grey),
@@ -92,7 +96,7 @@ class ListingCard extends StatelessWidget {
                       const Spacer(),
                       const Icon(Icons.access_time, size: 14, color: Colors.grey),
                       const SizedBox(width: 4),
-                      Text(timeago.format(listing.createdAt, locale: 'ar'), style: const TextStyle(color: Colors.grey, fontSize: 12, fontFamily: 'Cairo')),
+                      Text(_timeAgo(listing.createdAt), style: const TextStyle(color: Colors.grey, fontSize: 12, fontFamily: 'Cairo')),
                     ],
                   ),
                   if (showActions && onDelete != null) ...[
@@ -120,10 +124,7 @@ class ListingCard extends StatelessWidget {
   Widget _tag(String label, IconData icon, Color color) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(20),
-      ),
+      decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(20)),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
