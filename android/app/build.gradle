@@ -7,7 +7,6 @@ plugins {
 android {
     namespace "com.truckmarket.app"
     compileSdk 34
-    ndkVersion "25.1.8937393"
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
@@ -24,7 +23,6 @@ android {
         targetSdk 34
         versionCode 1
         versionName "1.0.0"
-        multiDexEnabled true
     }
 
     buildTypes {
@@ -38,9 +36,4 @@ android {
 
 flutter {
     source "../.."
-}
-
-dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.10"
-    implementation "androidx.multidex:multidex:2.0.1"
 }
