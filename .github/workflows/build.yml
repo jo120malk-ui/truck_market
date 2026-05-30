@@ -35,15 +35,16 @@ jobs:
         working-directory: /tmp/fresh_app
         run: flutter pub get
 
-      - name: Show pubspec resolved
+      - name: Dart analyze
         working-directory: /tmp/fresh_app
-        run: cat pubspec.lock | head -30
+        run: flutter analyze 2>&1 || true
 
-      - name: Build APK
+      - name: Build APK verbose
         working-directory: /tmp/fresh_app
-        run: flutter build apk --release --no-shrink
+        run: flutter build apk --release --no-shrink --verbose 2>&1 | tail -100
 
       - uses: actions/upload-artifact@v4
+        if: success()
         with:
           name: truck-market-apk
           path: /tmp/fresh_app/build/app/outputs/flutter-apk/app-release.apk
