@@ -23,23 +23,34 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Flutter doctor
-        run: flutter doctor -v
+      - name: Create fresh Flutter project and replace lib
+        run: |
+          # Create a fresh Flutter project alongside
+          flutter create --org com.truckmarket --project-name truck_market /tmp/fresh_app
+          
+          # Replace lib folder with our code
+          rm -rf /tmp/fresh_app/lib
+          cp -r lib /tmp/fresh_app/lib
+          
+          # Replace pubspec.yaml
+          cp pubspec.yaml /tmp/fresh_app/pubspec.yaml
+          
+          # Replace assets if any
+          mkdir -p /tmp/fresh_app/assets/images
+          
+          echo "Fresh project created"
+          ls /tmp/fresh_app/android/
 
-      - name: Flutter pub get
+      - name: Get dependencies
+        working-directory: /tmp/fresh_app
         run: flutter pub get
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x android/gradlew
-
-      - name: Build APK (debug first for test)
-        run: flutter build apk --debug
-
-      - name: Build APK release
+      - name: Build APK
+        working-directory: /tmp/fresh_app
         run: flutter build apk --release --no-shrink
 
       - uses: actions/upload-artifact@v4
         with:
           name: truck-market-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: /tmp/fresh_app/build/app/outputs/flutter-apk/app-release.apk
           retention-days: 30
